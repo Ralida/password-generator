@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Password Generator</title>
+<style>
+  body{font-family:system-ui,Arial,sans-serif;max-width:760px;margin:40px auto;padding:0 16px}
+  .box{border:1px solid #eee;border-radius:12px;padding:16px}
+  label{display:block;margin:8px 0}
+  input[type="range"]{width:100%}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  input[type="text"]{flex:1;padding:10px;border:1px solid #ddd;border-radius:8px}
+  button{padding:10px 14px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Password Generator</h1>
+<div class="box">
+  <label>Length: <output id="lenOut">12</output></label>
+  <input id="len" type="range" min="6" max="40" value="12" oninput="lenOut.textContent=this.value">
+  <div class="row">
+    <label><input id="lower" type="checkbox" checked> a–z</label>
+    <label><input id="upper" type="checkbox" checked> A–Z</label>
+    <label><input id="digits" type="checkbox" checked> 0–9</label>
+    <label><input id="symbols" type="checkbox"> !@#$%^&*</label>
+  </div>
+  <div class="row" style="margin:10px 0">
+    <input id="out" type="text" readonly placeholder="Your password will appear here">
+  </div>
+  <div class="row">
+    <button id="genBtn">Generate</button>
+    <button id="copyBtn">Copy</button>
+  </div>
+</div>
+
+<script>
+const lower=document.getElementById('lower');
+const upper=document.getElementById('upper');
+const digits=document.getElementById('digits');
+const symbols=document.getElementById('symbols');
+const out=document.getElementById('out');
+
+function gen(){
+  const len=+document.getElementById('len').value;
+  const sets=[];
+  if(lower.checked) sets.push("abcdefghijklmnopqrstuvwxyz");
+  if(upper.checked) sets.push("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+  if(digits.checked) sets.push("0123456789");
+  if(symbols.checked) sets.push("!@#$%^&*()_+[]{};:,.?-");
+  if(!sets.length){ out.value="Select at least one character set"; return; }
+  // ensure at least one char from each selected set
+  let chars=sets.map(s=>s[Math.floor(Math.random()*s.length)]);
+  const all=sets.join('');
+  while(chars.length<len){ chars.push(all[Math.floor(Math.random()*all.length)]); }
+  // shuffle
+  for(let i=chars.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [chars[i],chars[j]]=[chars[j],chars[i]]; }
+  out.value=chars.join('');
+}
+
+async function copy(){
+  if(!out.value) return;
+  try{ await navigator.clipboard.writeText(out.value); alert("Copied!"); }
+  catch{ out.select(); document.execCommand('copy'); alert("Copied."); }
+}
+
+document.getElementById('genBtn').onclick=gen;
+document.getElementById('copyBtn').onclick=copy;
+</script>
+</body>
+</html>
